@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>ML Fast TopUp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:Arial,sans-serif;background:#0b1220;color:#fff;margin:0;padding:0;}
+    header{background:#3abef9;color:#001018;padding:15px;text-align:center;font-size:20px;font-weight:bold;}
+    .container{max-width:800px;margin:20px auto;padding:20px;background:#121a2b;border-radius:12px;}
+    h2{margin-top:0;}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;margin:20px 0;}
+    .card{background:#1c273f;padding:15px;border-radius:10px;text-align:center;cursor:pointer;transition:.2s;}
+    .card:hover{background:#2a3654;}
+    .selected{outline:2px solid #3abef9;}
+    .payment-option{display:flex;align-items:center;gap:10px;padding:10px;background:#1c273f;border-radius:8px;margin:5px 0;cursor:pointer;}
+    .payment-option:hover{background:#2a3654;}
+    .active{outline:2px solid #6be675;}
+    button{margin-top:15px;padding:12px;width:100%;border:none;border-radius:8px;cursor:pointer;font-weight:bold;}
+    .btn-order{background:#3abef9;color:#001018;}
+    .btn-pay{background:#6be675;color:#001018;display:none;}
+    .summary{margin-top:20px;background:#1c273f;padding:15px;border-radius:10px;}
+  </style>
+</head>
+<body>
+  <header>💎 ML Fast TopUp</header>
+  <div class="container">
+    <h2>Pilih Jumlah Diamond</h2>
+    <div class="grid" id="packs"></div>
+
+    <h2>Pilih Metode Pembayaran</h2>
+    <div id="payments"></div>
+
+    <div class="summary" id="summary" style="display:none;">
+      <h3>Ringkasan Pesanan</h3>
+      <p>ID Order: <span id="orderId">-</span></p>
+      <p>Paket: <span id="orderPack">-</span></p>
+      <p>Metode: <span id="orderPay">-</span></p>
+      <p>Total: <span id="orderTotal">-</span></p>
+    </div>
+
+    <button class="btn-order" id="makeOrder">Buat Pesanan</button>
+    <button class="btn-pay" id="payNow">Lanjutkan Pembayaran</button>
+  </div>
+
+  <script>
+    const packs=[
+      {title:"86 Diamonds",price:20000},
+      {title:"172 Diamonds",price:40000},
+      {title:"257 Diamonds",price:60000},
+      {title:"344 Diamonds",price:80000},
+      {title:"514 Diamonds",price:120000},
+      {title:"706 Diamonds",price:160000}
+    ];
+    const payments=[
+      {id:"qris",label:"QRIS"},
+      {id:"gopay",label:"GoPay"},
+      {id:"ovo",label:"OVO"},
+      {id:"dana",label:"DANA"},
+      {id:"bca",label:"BCA Virtual Account"},
+      {id:"shopee",label:"ShopeePay"}
+    ];
+    let selectedPack=null,selectedPay=null;
+
+    const packContainer=document.getElementById('packs');
+    packs.forEach((p,i)=>{
+      const div=document.createElement('div');
+      div.className='card';
+      div.textContent=`${p.title}\nRp ${p.price.toLocaleString('id-ID')}`;
+      div.onclick=()=>{
+        document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
+        div.classList.add('selected');selectedPack=p;
+      };
+      packContainer.appendChild(div);
+    });
+
+    const payContainer=document.getElementById('payments');
+    payments.forEach(p=>{
+      const div=document.createElement('div');
+      div.className='payment-option';
+      div.textContent=p.label;
+      div.onclick=()=>{
+        document.querySelectorAll('.payment-option').forEach(c=>c.classList.remove('active'));
+        div.classList.add('active');selectedPay=p;
+      };
+      payContainer.appendChild(div);
+    });
+
+    document.getElementById('makeOrder').addEventListener('click',()=>{
+      if(!selectedPack||!selectedPay){alert("Pilih paket dan metode!");return;}
+      document.getElementById('summary').style.display='block';
+      const orderId='ORD'+Math.floor(Math.random()*1000000);
+      document.getElementById('orderId').textContent=orderId;
+      document.getElementById('orderPack').textContent=selectedPack.title;
+      document.getElementById('orderPay').textContent=selectedPay.label;
+      document.getElementById('orderTotal').textContent="Rp "+selectedPack.price.toLocaleString('id-ID');
+      document.getElementById('payNow').style.display='block';
+    });
+
+    document.getElementById('payNow').addEventListener('click',()=>{
+      if(!selectedPack||!selectedPay) return;
+      const orderId=document.getElementById('orderId').textContent;
+      const pay=selectedPay.label;
+      const total=selectedPack.price;
+      const pack=selectedPack.title;
+      const url=`payment.html?order=${orderId}&pack=${encodeURIComponent(pack)}&total=${total}&pay=${encodeURIComponent(pay)}`;
+      window.location.href=url;
+    });
+  </script>
+</body>
+</html>
